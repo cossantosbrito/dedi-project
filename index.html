@@ -1,28 +1,42 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="tet">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cold Room Monitor</title>
+<meta name="theme-color" content="#101a22">
+<title>Monitór Temperatura Cold Room no Nivel Bee Iha Tanke </title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --ground:#C4CED5;
-  --panel:#F3F7F9;
-  --panel-edge:#9FB0BA;
-  --ink:#16222B;
-  --muted:#5C707C;
-  --water:#1E6F9F;
-  --water-soft:#8EC4E0;
-  --cold:#3E8FB0;
-  --warn:#B87400;
-  --alarm:#AC2E1E;
-  --ok:#2C7A5B;
-  --radius:3px;
+  --bg-1:#eef2ff;
+  --bg-2:#e0f2fe;
+  --panel:#ffffff;
+  --panel-alt:#f8fafc;
+  --edge:#e2e8f0;
+  --ink:#111827;
+  --muted:#6b7280;
+  --water:#0ea5e9;
+  --water-light:#7dd3fc;
+  --water-soft:#bae6fd;
+  --water-wash:#eff8ff;
+  --cold:#8b5cf6;
+  --cold-light:#c4b5fd;
+  --cold-wash:#f8f5ff;
+  --warn:#d97706;
+  --warn-soft:#fde7c7;
+  --alarm:#dc2626;
+  --alarm-soft:#fbd5d5;
+  --ok:#16a34a;
+  --ok-soft:#d1fae5;
+  --radius:14px;
+  --radius-sm:8px;
+  --shadow-sm:0 1px 2px rgba(17,24,39,.06);
+  --shadow-md:0 4px 18px rgba(17,24,39,.09);
+  --shadow-lg:0 14px 34px rgba(17,24,39,.16);
 }
 
 *{box-sizing:border-box}
@@ -30,15 +44,15 @@
 html,body{margin:0;padding:0}
 
 body{
-  background:var(--ground);
+  background:linear-gradient(160deg,var(--bg-1),var(--bg-2)) fixed;
   color:var(--ink);
   font-family:'Barlow',system-ui,sans-serif;
   font-size:16px;
   line-height:1.45;
-  padding:20px 16px 48px;
+  padding:28px 16px 56px;
 }
 
-.wrap{max-width:900px;margin:0 auto}
+.wrap{max-width:920px;margin:0 auto}
 
 h1,h2,h3,.label,.readout-unit,button,select{
   font-family:'Barlow Condensed','Barlow',system-ui,sans-serif;
@@ -47,25 +61,57 @@ h1,h2,h3,.label,.readout-unit,button,select{
 /* ---------- header ---------- */
 
 .bar{
-  display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;
-  border-bottom:2px solid var(--ink);
-  padding-bottom:10px;margin-bottom:22px;
+  display:flex;flex-wrap:wrap;align-items:center;gap:12px;
+  background:var(--panel);
+  border:1px solid var(--edge);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-md);
+  padding:16px 20px;margin-bottom:22px;
 }
 
-h1{font-size:30px;font-weight:600;letter-spacing:.2px;margin:0}
+.brand{display:flex;align-items:center;gap:10px}
+.brand-icon{color:var(--water);flex:0 0 auto}
+.brand-text{display:flex;flex-direction:column;gap:1px}
+.brand-by{font-size:12.5px;color:var(--muted);font-weight:500;letter-spacing:.2px}
 
-.device{color:var(--muted);font-size:17px}
+h1{font-size:28px;font-weight:600;letter-spacing:.2px;margin:0}
+
+.device{
+  color:var(--muted);font-size:14.5px;font-weight:500;
+  background:var(--panel-alt);border:1px solid var(--edge);
+  border-radius:999px;padding:3px 12px;
+}
 
 .status{
-  margin-left:auto;display:inline-flex;align-items:center;gap:8px;
-  font-size:15px;font-weight:500;
-  padding:3px 12px;border-radius:999px;
-  border:1px solid var(--panel-edge);background:var(--panel);
+  margin-left:auto;display:inline-flex;align-items:center;gap:9px;
+  font-size:14.5px;font-weight:500;
+  padding:5px 14px;border-radius:999px;
+  border:1px solid var(--edge);background:var(--panel-alt);
 }
-.dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.dot{position:relative;width:9px;height:9px;border-radius:50%;background:var(--muted)}
 .status[data-state="live"] .dot{background:var(--ok)}
 .status[data-state="stale"] .dot{background:var(--warn)}
 .status[data-state="down"] .dot{background:var(--alarm)}
+.status[data-state="live"] .dot::after{
+  content:'';position:absolute;inset:-4px;border-radius:50%;
+  border:2px solid var(--ok);opacity:.55;
+  animation:pulse 1.8s ease-out infinite;
+}
+@keyframes pulse{
+  0%{transform:scale(.5);opacity:.55}
+  100%{transform:scale(2.1);opacity:0}
+}
+
+.offline-banner{
+  display:flex;align-items:center;gap:10px;
+  background:var(--alarm-soft);color:var(--alarm);
+  border:1px solid var(--alarm);border-radius:var(--radius);
+  padding:12px 18px;margin-bottom:22px;
+  font-weight:500;font-size:14.5px;
+  box-shadow:var(--shadow-sm);
+}
+.offline-banner[hidden]{display:none}
+.offline-banner-icon{font-size:18px;line-height:1}
 
 /* ---------- instruments ---------- */
 
@@ -74,21 +120,34 @@ h1{font-size:30px;font-weight:600;letter-spacing:.2px;margin:0}
 }
 
 .gauge{
+  position:relative;overflow:hidden;
   background:var(--panel);
-  border:1px solid var(--panel-edge);
-  border-top:3px solid var(--ink);
+  border:1px solid var(--edge);
   border-radius:var(--radius);
-  padding:18px 18px 14px;
-  display:flex;gap:16px;
+  box-shadow:var(--shadow-md);
+  padding:20px 20px 16px;
+  display:flex;gap:18px;
+  transition:transform .2s ease,box-shadow .2s ease;
 }
+.gauge:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.gauge::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--ink);
+}
+.instruments .gauge:nth-child(1)::before{background:linear-gradient(90deg,var(--water),var(--water-light))}
+.instruments .gauge:nth-child(2)::before{background:linear-gradient(90deg,var(--cold),var(--cold-light))}
+.instruments .gauge:nth-child(1){background:linear-gradient(180deg,var(--water-wash),var(--panel) 65%)}
+.instruments .gauge:nth-child(2){background:linear-gradient(180deg,var(--cold-wash),var(--panel) 65%)}
+.instruments .gauge:nth-child(1) .label{color:var(--water)}
+.instruments .gauge:nth-child(2) .label{color:var(--cold)}
 
 .gauge svg{flex:0 0 auto}
+.gauge svg .fill,.gauge svg .mercury,#bulb{filter:drop-shadow(0 2px 2px rgba(16,26,34,.15))}
 
 .gauge-body{display:flex;flex-direction:column;justify-content:center;min-width:0}
 
 .label{
-  font-size:18px;font-weight:500;color:var(--muted);
-  margin:0 0 2px;
+  font-size:17px;font-weight:500;color:var(--muted);
+  margin:0 0 2px;text-transform:uppercase;letter-spacing:.4px;
 }
 
 .readout{
@@ -96,16 +155,17 @@ h1{font-size:30px;font-weight:600;letter-spacing:.2px;margin:0}
   font-variant-numeric:tabular-nums;
   letter-spacing:-1px;
 }
-.readout-unit{font-size:24px;font-weight:400;color:var(--muted);margin-left:4px}
+.readout-unit{font-size:22px;font-weight:400;color:var(--muted);margin-left:4px}
 
-.sub{font-size:15px;color:var(--muted);margin-top:8px}
+.sub{font-size:14.5px;color:var(--muted);margin-top:8px}
 
 .flag{
-  display:inline-block;margin-top:10px;font-size:14px;font-weight:600;
-  padding:2px 9px;border-radius:2px;color:#fff;background:var(--ok);
+  display:inline-block;margin-top:10px;font-size:12.5px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.3px;
+  padding:3px 11px;border-radius:999px;
 }
-.flag[data-level="warn"]{background:var(--warn)}
-.flag[data-level="alarm"]{background:var(--alarm)}
+.flag[data-level="warn"]{background:var(--warn-soft);color:var(--warn)}
+.flag[data-level="alarm"]{background:var(--alarm-soft);color:var(--alarm)}
 .flag[data-level="none"]{display:none}
 
 .fill,.mercury{transition:y .5s ease,height .5s ease}
@@ -114,68 +174,128 @@ h1{font-size:30px;font-weight:600;letter-spacing:.2px;margin:0}
 
 .history{
   margin-top:16px;background:var(--panel);
-  border:1px solid var(--panel-edge);border-radius:var(--radius);
-  padding:14px 18px 10px;
+  border:1px solid var(--edge);border-radius:var(--radius);
+  box-shadow:var(--shadow-md);
+  padding:16px 20px 12px;
 }
-.history-head{display:flex;flex-wrap:wrap;gap:16px;align-items:baseline}
-.history h2{font-size:19px;font-weight:500;margin:0}
-.key{display:flex;gap:14px;margin-left:auto;font-size:14px;color:var(--muted)}
-.key span{display:inline-flex;align-items:center;gap:6px}
-.swatch{width:14px;height:3px;display:inline-block}
+.history-head{display:flex;flex-wrap:wrap;gap:16px;align-items:center;margin-bottom:6px}
+.history h2{font-size:18px;font-weight:500;margin:0}
+.key{display:flex;gap:10px;margin-left:auto;font-size:13.5px;color:var(--muted)}
+.key span{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--panel-alt);border:1px solid var(--edge);
+  border-radius:999px;padding:3px 10px;font-weight:500;
+}
+.swatch{width:12px;height:4px;border-radius:2px;display:inline-block}
+
+.export-link{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:13px;font-weight:600;color:var(--water);
+  text-decoration:none;padding:4px 13px;
+  border:1px solid var(--water);border-radius:999px;
+  transition:background .15s ease;
+}
+.export-link:hover{background:var(--water-wash)}
+.history .hint{margin-top:10px;margin-bottom:0}
+
+.table-wrap{overflow:auto;max-height:280px;margin-top:14px;border:1px solid var(--edge);border-radius:var(--radius-sm)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;font-variant-numeric:tabular-nums}
+thead th{
+  position:sticky;top:0;background:var(--panel-alt);color:var(--muted);
+  font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px;
+  text-align:left;padding:8px 12px;border-bottom:1px solid var(--edge);white-space:nowrap;
+}
+tbody td{padding:7px 12px;border-bottom:1px solid var(--edge);white-space:nowrap;color:var(--ink)}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover{background:var(--panel-alt)}
+td.cell-warn{color:var(--warn);font-weight:600}
+td.cell-alarm{color:var(--alarm);font-weight:600}
+td.table-empty{color:var(--muted);text-align:center;padding:16px;white-space:normal}
+.table-wrap::-webkit-scrollbar{width:8px;height:8px}
+.table-wrap::-webkit-scrollbar-track{background:transparent}
+.table-wrap::-webkit-scrollbar-thumb{background:var(--edge);border-radius:4px}
 
 /* ---------- settings + log ---------- */
 
 details{
   margin-top:16px;background:var(--panel);
-  border:1px solid var(--panel-edge);border-radius:var(--radius);
+  border:1px solid var(--edge);border-radius:var(--radius);
+  box-shadow:var(--shadow-md);
+  overflow:hidden;
 }
 summary{
-  cursor:pointer;padding:12px 18px;font-family:'Barlow Condensed',sans-serif;
-  font-size:19px;font-weight:500;
+  list-style:none;cursor:pointer;padding:14px 20px;
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px;font-weight:500;
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
 }
+summary::-webkit-details-marker{display:none}
+summary::after{
+  content:'▾';color:var(--muted);font-size:15px;
+  transform:rotate(-90deg);transition:transform .2s ease;
+}
+details[open] summary::after{transform:rotate(0deg)}
 summary:focus-visible{outline:2px solid var(--water);outline-offset:-2px}
-.details-body{padding:0 18px 18px}
+.details-body{padding:0 20px 20px}
 
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}
 
-label.field{display:flex;flex-direction:column;gap:3px;font-size:14px;color:var(--muted)}
+label.field{display:flex;flex-direction:column;gap:4px;font-size:13.5px;color:var(--muted);font-weight:500}
 input{
-  font:inherit;font-size:15px;padding:7px 9px;
-  border:1px solid var(--panel-edge);border-radius:2px;
-  background:#fff;color:var(--ink);width:100%;
+  font:inherit;font-size:15px;padding:8px 10px;
+  border:1px solid var(--edge);border-radius:var(--radius-sm);
+  background:var(--panel-alt);color:var(--ink);width:100%;
+  transition:border-color .15s ease,background .15s ease;
 }
-input:focus-visible{outline:2px solid var(--water);outline-offset:-1px}
+input:focus-visible{outline:2px solid var(--water);outline-offset:-1px;background:#fff}
+input:disabled{color:var(--muted);cursor:not-allowed;opacity:.75}
 
-.actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
 
 button{
-  font-size:17px;font-weight:500;padding:8px 20px;cursor:pointer;
-  border:1px solid var(--ink);border-radius:2px;
-  background:var(--ink);color:#fff;
+  font-size:16px;font-weight:500;padding:9px 22px;cursor:pointer;
+  border:none;border-radius:999px;
+  background:linear-gradient(135deg,var(--water),var(--cold));color:#fff;
+  box-shadow:0 3px 12px rgba(14,165,233,.35);
+  transition:transform .12s ease,box-shadow .12s ease,opacity .12s ease;
 }
-button.ghost{background:transparent;color:var(--ink)}
+button:hover:not(:disabled){box-shadow:0 6px 18px rgba(139,92,246,.4);transform:translateY(-1px)}
+button:active:not(:disabled){transform:translateY(0) scale(.97)}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--edge);box-shadow:none}
+button.ghost:hover:not(:disabled){background:var(--panel-alt);box-shadow:none}
 button:focus-visible{outline:2px solid var(--water);outline-offset:2px}
-button:disabled{opacity:.45;cursor:not-allowed}
+button:disabled{opacity:.4;cursor:not-allowed}
 
 .log{
-  margin-top:14px;max-height:190px;overflow:auto;
-  background:#fff;border:1px solid var(--panel-edge);
-  padding:8px 10px;font-size:13.5px;line-height:1.6;
+  margin-top:16px;max-height:190px;overflow:auto;
+  background:var(--panel-alt);border:1px solid var(--edge);border-radius:var(--radius-sm);
+  padding:10px 12px;font-size:13.5px;line-height:1.6;
 }
+.log::-webkit-scrollbar{width:8px}
+.log::-webkit-scrollbar-track{background:transparent}
+.log::-webkit-scrollbar-thumb{background:var(--edge);border-radius:4px}
 .log p{margin:0;color:var(--muted)}
-.log b{color:var(--ink);font-weight:500}
+.log p+p{margin-top:2px}
+.log b{color:var(--ink);font-weight:600}
 
-.hint{font-size:14px;color:var(--muted);margin:10px 0 0}
+.hint{
+  font-size:13.5px;color:var(--muted);margin:14px 0 0;
+  padding-left:12px;border-left:3px solid var(--water-soft);
+}
+.hint code{background:var(--panel-alt);padding:1px 5px;border-radius:4px;font-size:12.5px}
 
 @media (max-width:640px){
   .instruments{grid-template-columns:1fr}
   .grid{grid-template-columns:1fr}
   .readout{font-size:46px}
-  h1{font-size:25px}
+  h1{font-size:23px}
+  .status{margin-left:0}
 }
 
 @media (prefers-reduced-motion:reduce){
   .fill,.mercury{transition:none}
+  .status[data-state="live"] .dot::after{animation:none}
+  .gauge{transition:none}
 }
 </style>
 </head>
@@ -183,16 +303,30 @@ button:disabled{opacity:.45;cursor:not-allowed}
 <div class="wrap">
 
   <div class="bar">
-    <h1>Cold room monitor</h1>
-    <span class="device" id="deviceName">coldroom-01</span>
+    <div class="brand">
+      <svg class="brand-icon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+        <path d="M12 2v20M4.2 6.5l15.6 11M4.2 17.5l15.6-11"/>
+        <path d="M12 2l-2 2M12 2l2 2M12 22l-2-2M12 22l2-2M4.2 6.5l2.6.3M4.2 6.5l.6-2.6M19.8 6.5l-2.6.3M19.8 6.5l-.6-2.6M4.2 17.5l.6 2.6M4.2 17.5l2.6-.3M19.8 17.5l-2.6-.3M19.8 17.5l.6 2.6"/>
+      </svg>
+      <div class="brand-text">
+        <h1>Monitór Cold Room</h1>
+        <span class="brand-by">Engineiro Dediano</span>
+      </div>
+    </div>
+    <span class="device" id="deviceName">Coldroom-01</span>
     <span class="status" id="status" data-state="down">
-      <span class="dot"></span><span id="statusText">Belum terhubung</span>
+      <span class="dot"></span><span id="statusText">Seidauk konektadu</span>
     </span>
+  </div>
+
+  <div class="offline-banner" id="offlineBanner" hidden>
+    <span class="offline-banner-icon" aria-hidden="true">⚠</span>
+    <span>Ekipamentu offline. Favor verifika ekipamentu ka konekta fali.</span>
   </div>
 
   <div class="instruments">
 
-    <!-- ===== TANGKI AIR ===== -->
+    <!-- ===== TANGKE BEE ===== -->
     <div class="gauge">
       <svg width="76" height="180" viewBox="0 0 76 180" aria-hidden="true">
         <defs>
@@ -206,21 +340,21 @@ button:disabled{opacity:.45;cursor:not-allowed}
               fill="var(--water-soft)" clip-path="url(#tankClip)"/>
         <path d="M8 8 h60 v140 a12 12 0 0 1 -12 12 h-36 a12 12 0 0 1 -12 -12 z"
               fill="none" stroke="var(--ink)" stroke-width="2"/>
-        <g stroke="var(--panel-edge)" stroke-width="1">
+        <g stroke="var(--edge)" stroke-width="1">
           <line x1="68" y1="46" x2="74" y2="46"/>
           <line x1="68" y1="84" x2="74" y2="84"/>
           <line x1="68" y1="122" x2="74" y2="122"/>
         </g>
       </svg>
       <div class="gauge-body">
-        <p class="label">Tinggi air</p>
+        <p class="label">Nivel bee</p>
         <div><span class="readout" id="levelValue">—</span><span class="readout-unit">cm</span></div>
-        <p class="sub" id="levelSub">Menunggu data</p>
+        <p class="sub" id="levelSub">Hein dadus</p>
         <span class="flag" id="levelFlag" data-level="none"></span>
       </div>
     </div>
 
-    <!-- ===== SUHU RUANGAN ===== -->
+    <!-- ===== TEMPERATURA KUARTU ===== -->
     <div class="gauge">
       <svg width="76" height="180" viewBox="0 0 76 180" aria-hidden="true">
         <defs>
@@ -234,67 +368,88 @@ button:disabled{opacity:.45;cursor:not-allowed}
         <path d="M28 14 a10 10 0 0 1 20 0 v112" fill="none" stroke="var(--ink)" stroke-width="2"/>
         <path d="M48 126 v-112" fill="none" stroke="var(--ink)" stroke-width="2"/>
         <circle cx="38" cy="150" r="16" fill="none" stroke="var(--ink)" stroke-width="2"/>
-        <g stroke="var(--panel-edge)" stroke-width="1">
+        <g stroke="var(--edge)" stroke-width="1">
           <line x1="48" y1="40" x2="56" y2="40"/>
           <line x1="48" y1="70" x2="56" y2="70"/>
           <line x1="48" y1="100" x2="56" y2="100"/>
         </g>
       </svg>
       <div class="gauge-body">
-        <p class="label">Suhu ruangan</p>
+        <p class="label">Temperatura kuartu</p>
         <div><span class="readout" id="tempValue">—</span><span class="readout-unit">°C</span></div>
-        <p class="sub" id="tempSub">Menunggu data</p>
+        <p class="sub" id="tempSub">Hein dadus</p>
         <span class="flag" id="tempFlag" data-level="none"></span>
       </div>
     </div>
   </div>
 
-  <!-- ===== RIWAYAT ===== -->
+  <!-- ===== ISTÓRIA ===== -->
   <div class="history">
     <div class="history-head">
-      <h2>Riwayat 60 pembacaan terakhir</h2>
+      <h2>Istória husi lezaun 60 ikus</h2>
       <div class="key">
-        <span><i class="swatch" style="background:var(--water)"></i>Tinggi air</span>
-        <span><i class="swatch" style="background:var(--cold)"></i>Suhu</span>
+        <span><i class="swatch" style="background:var(--water)"></i>Nivel bee</span>
+        <span><i class="swatch" style="background:var(--cold)"></i>Temperatura</span>
       </div>
+      <a class="export-link" id="exportLink" href="http://localhost:8090/api/export.csv" target="_blank" rel="noopener">⬇ Exporta CSV</a>
     </div>
-    <svg id="chart" viewBox="0 0 600 130" width="100%" height="130" preserveAspectRatio="none" role="img" aria-label="Grafik riwayat"></svg>
+    <p class="hint" id="exportHint">Exporta CSV hetan dadus kompletu husi database (la'ós de'it 60 lezaun ikus). Presiza servisu <code>server/</code> nebe hala'o (hare <code>server/README.md</code>).</p>
+    <svg id="chart" viewBox="0 0 600 130" width="100%" height="130" preserveAspectRatio="none" role="img" aria-label="Gráfiku istória"></svg>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Ora</th>
+            <th>Nivel bee (cm)</th>
+            <th>Temperatura (°C)</th>
+            <th>Distánsia sensór (cm)</th>
+            <th>Kapasidade tanke</th>
+            <th>Sinál (dBm)</th>
+          </tr>
+        </thead>
+        <tbody id="historyTableBody">
+          <tr><td colspan="7" class="table-empty">Seidauk iha lezaun.</td></tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- ===== PENGATURAN ===== -->
+  <!-- ===== KONFIGURASAUN ===== -->
   <details id="settings" open>
-    <summary>Koneksi &amp; batas aman</summary>
+    <summary>Konesaun &amp; limite seguru</summary>
     <div class="details-body">
       <div class="grid">
-        <label class="field">Alamat broker (WebSocket)
-          <input id="url" value="wss://73ffe5ace0de41cfaac68f90275a934d.s1.eu.hivemq.cloud:8884/mqtt">
+        <label class="field">Enderesu broker (WebSocket)
+          <input id="url" value="wss://73ffe5ace0de41cfaac68f90275a934d.s1.eu.hivemq.cloud:8884/mqtt" disabled>
         </label>
-        <label class="field">Topic dasar
-          <input id="base" value="coldroom/coldroom-daya-marketing">
+        <label class="field">Tópiku baze
+          <input id="base" value="coldroom/coldroom-daya-marketing" disabled>
         </label>
-        <label class="field">Username (kosongkan bila tidak perlu)
-          <input id="user" value="">
+        <label class="field">Username (husik mamuk se la presiza)
+          <input id="user" value="Eng. Dediano" disabled>
         </label>
         <label class="field">Password
-          <input id="pass" type="password" value="">
+          <input id="pass" type="password" value="" disabled>
         </label>
-        <label class="field">Suhu maksimum (°C)
-          <input id="tempMax" type="number" step="0.5" value="8">
+        <label class="field">Temperatura másima (°C)
+          <input id="tempMax" type="number" step="0.5" value="35" disabled>
         </label>
-        <label class="field">Tinggi air minimum (cm)
-          <input id="levelMin" type="number" step="0.5" value="5">
+        <label class="field">Nivel bee mínima (cm)
+          <input id="levelMin" type="number" step="0.5" value="0" disabled>
         </label>
       </div>
 
       <div class="actions">
-        <button id="connectBtn">Hubungkan</button>
-        <button id="disconnectBtn" class="ghost" disabled>Putuskan</button>
-        <button id="pingBtn" class="ghost" disabled>Minta data sekarang</button>
+        <button id="connectBtn">Konekta</button>
+        <button id="disconnectBtn" class="ghost" disabled>Deskonekta</button>
+        <button id="pingBtn" class="ghost" disabled>Husu dadus agora</button>
       </div>
 
-      <p class="hint">HiveMQ Cloud memakai port 8884 untuk WebSocket (bukan 8883, itu untuk perangkat), selalu <code>wss://</code>, dengan akhiran <code>/mqtt</code>. Username dan password wajib diisi.</p>
+      <p class="hint">HiveMQ Cloud uza porta 8884 ba WebSocket (la'ós 8883, ne'e ba ekipamentu), sempre <code>wss://</code>, ho sufixu <code>/mqtt</code>. Naran uza no password obrigatóriu atu prienxe.</p>
 
-      <div class="log" id="log"><p>Belum ada aktivitas.</p></div>
+      <div class="log" id="log"><p>Seidauk iha atividade.</p></div>
     </div>
   </details>
 
@@ -315,11 +470,12 @@ if (typeof mqtt === 'undefined') {
 
   var client = null;
   var lastSeen = 0;
+  var connectedAt = 0;
   var history = [];          // {level, temp, t}
   var HISTORY_MAX = 60;
   var STALE_MS = 15000;
 
-  // ---------- penyimpanan pengaturan di browser ----------
+  // ---------- rai konfigurasaun iha browser ----------
 
   var FIELDS = ['url', 'base', 'user', 'pass', 'tempMax', 'levelMin'];
 
@@ -327,7 +483,7 @@ if (typeof mqtt === 'undefined') {
     try {
       var saved = JSON.parse(localStorage.getItem('coldroom.settings') || '{}');
       FIELDS.forEach(function (k) { if (saved[k] !== undefined) $(k).value = saved[k]; });
-    } catch (e) { /* abaikan */ }
+    } catch (e) { /* ignora */ }
   }
 
   function saveSettings() {
@@ -335,7 +491,7 @@ if (typeof mqtt === 'undefined') {
       var out = {};
       FIELDS.forEach(function (k) { out[k] = $(k).value; });
       localStorage.setItem('coldroom.settings', JSON.stringify(out));
-    } catch (e) { /* abaikan */ }
+    } catch (e) { /* ignora */ }
   }
 
   // ---------- log ----------
@@ -357,7 +513,13 @@ if (typeof mqtt === 'undefined') {
     $('statusText').textContent = text;
   }
 
-  // ---------- gambar tangki & termometer ----------
+  function setOfflineBanner(show) {
+    var el = $('offlineBanner');
+    if (show) el.removeAttribute('hidden');
+    else el.setAttribute('hidden', '');
+  }
+
+  // ---------- dezenha tangke & termómetru ----------
 
   var TANK_TOP = 10, TANK_BOTTOM = 158;
 
@@ -383,27 +545,49 @@ if (typeof mqtt === 'undefined') {
     $('bulb').setAttribute('fill', color);
   }
 
-  // ---------- grafik riwayat ----------
+  // ---------- gráfiku istória ----------
 
   function drawChart() {
     var svg = $('chart');
     svg.innerHTML = '';
 
+    var NS = 'http://www.w3.org/2000/svg';
+    var W = 600, H = 130, PAD = 10;
+
+    var defs = document.createElementNS(NS, 'defs');
+    defs.innerHTML =
+      '<linearGradient id="gradWater" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0" stop-color="#0ea5e9" stop-opacity="0.3"/>' +
+        '<stop offset="1" stop-color="#0ea5e9" stop-opacity="0"/>' +
+      '</linearGradient>' +
+      '<linearGradient id="gradCold" x1="0" y1="0" x2="0" y2="1">' +
+        '<stop offset="0" stop-color="#8b5cf6" stop-opacity="0.3"/>' +
+        '<stop offset="1" stop-color="#8b5cf6" stop-opacity="0"/>' +
+      '</linearGradient>';
+    svg.appendChild(defs);
+
+    for (var gi = 1; gi <= 3; gi++) {
+      var gy = (PAD + (H - PAD * 2) * gi / 4).toFixed(1);
+      var gline = document.createElementNS(NS, 'line');
+      gline.setAttribute('x1', PAD); gline.setAttribute('x2', W - PAD);
+      gline.setAttribute('y1', gy); gline.setAttribute('y2', gy);
+      gline.setAttribute('stroke', '#e2e8f0'); gline.setAttribute('stroke-width', '1');
+      svg.appendChild(gline);
+    }
+
     if (history.length < 2) {
-      var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-      t.setAttribute('x', 300); t.setAttribute('y', 68);
+      var t = document.createElementNS(NS, 'text');
+      t.setAttribute('x', W / 2); t.setAttribute('y', H / 2 + 5);
       t.setAttribute('text-anchor', 'middle');
-      t.setAttribute('fill', '#5C707C');
+      t.setAttribute('fill', '#6b7280');
       t.setAttribute('font-size', '14');
       t.setAttribute('font-family', 'Barlow, sans-serif');
-      t.textContent = 'Grafik muncul setelah beberapa pembacaan masuk.';
+      t.textContent = 'Gráfiku sei mosu depois de lezaun balun tama.';
       svg.appendChild(t);
       return;
     }
 
-    var W = 600, H = 130, PAD = 8;
-
-    function line(values, color) {
+    function line(values, color, gradId) {
       var valid = values.filter(function (v) { return v !== null; });
       if (valid.length < 2) return;
 
@@ -411,84 +595,145 @@ if (typeof mqtt === 'undefined') {
       var max = Math.max.apply(null, valid);
       if (max - min < 0.5) { max = min + 0.5; }
 
-      var d = '', started = false;
-
+      var segs = [], cur = [];
       values.forEach(function (v, i) {
-        if (v === null) { started = false; return; }
+        if (v === null) { if (cur.length) segs.push(cur); cur = []; return; }
         var x = PAD + (W - PAD * 2) * (values.length === 1 ? 0 : i / (values.length - 1));
         var y = H - PAD - (H - PAD * 2) * ((v - min) / (max - min));
-        d += (started ? ' L' : ' M') + x.toFixed(1) + ' ' + y.toFixed(1);
-        started = true;
+        cur.push([x, y]);
       });
+      if (cur.length) segs.push(cur);
 
-      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      path.setAttribute('d', d.trim());
-      path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', color);
-      path.setAttribute('stroke-width', '2');
-      path.setAttribute('stroke-linejoin', 'round');
-      path.setAttribute('vector-effect', 'non-scaling-stroke');
-      svg.appendChild(path);
+      segs.forEach(function (seg) {
+        if (seg.length < 2) return;
+        var dLine = seg.map(function (p, i) {
+          return (i === 0 ? 'M' : 'L') + p[0].toFixed(1) + ' ' + p[1].toFixed(1);
+        }).join(' ');
+
+        var area = document.createElementNS(NS, 'path');
+        area.setAttribute('d', dLine +
+          ' L' + seg[seg.length - 1][0].toFixed(1) + ' ' + (H - PAD) +
+          ' L' + seg[0][0].toFixed(1) + ' ' + (H - PAD) + ' Z');
+        area.setAttribute('fill', 'url(#' + gradId + ')');
+        area.setAttribute('stroke', 'none');
+        svg.appendChild(area);
+
+        var path = document.createElementNS(NS, 'path');
+        path.setAttribute('d', dLine);
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', color);
+        path.setAttribute('stroke-width', '2.25');
+        path.setAttribute('stroke-linejoin', 'round');
+        path.setAttribute('stroke-linecap', 'round');
+        path.setAttribute('vector-effect', 'non-scaling-stroke');
+        svg.appendChild(path);
+      });
     }
 
-    line(history.map(function (h) { return h.level; }), '#1E6F9F');
-    line(history.map(function (h) { return h.temp; }), '#3E8FB0');
+    line(history.map(function (h) { return h.level; }), '#0ea5e9', 'gradWater');
+    line(history.map(function (h) { return h.temp; }), '#8b5cf6', 'gradCold');
   }
 
-  // ---------- olah satu pesan telemetry ----------
+  // ---------- tabela istória ----------
+
+  function fmt(n, digits, unit) {
+    return (n === null || n === undefined || isNaN(n)) ? '—' : n.toFixed(digits) + (unit || '');
+  }
+
+  function renderHistoryTable(tempMax, levelMin) {
+    var body = $('historyTableBody');
+    body.innerHTML = '';
+
+    if (history.length === 0) {
+      body.innerHTML = '<tr><td colspan="7" class="table-empty">Seidauk iha lezaun.</td></tr>';
+      return;
+    }
+
+    for (var i = history.length - 1; i >= 0; i--) {
+      var r = history[i];
+      var dt = new Date(r.t);
+      var tr = document.createElement('tr');
+
+      var levelClass = (r.level !== null && r.level < levelMin) ? ' class="cell-alarm"' : '';
+      var tempClass = '';
+      if (r.temp !== null) {
+        if (r.temp > tempMax) tempClass = ' class="cell-alarm"';
+        else if (r.temp > tempMax - 2) tempClass = ' class="cell-warn"';
+      }
+
+      tr.innerHTML =
+        '<td>' + dt.toLocaleDateString() + '</td>' +
+        '<td>' + dt.toLocaleTimeString() + '</td>' +
+        '<td' + levelClass + '>' + fmt(r.level, 1) + '</td>' +
+        '<td' + tempClass + '>' + fmt(r.temp, 1) + '</td>' +
+        '<td>' + fmt(r.distance, 1) + '</td>' +
+        '<td>' + fmt(r.percent, 0, '%') + '</td>' +
+        '<td>' + (r.rssi === null ? '—' : r.rssi) + '</td>';
+      body.appendChild(tr);
+    }
+  }
+
+  // ---------- prosesa mensajen telemetry ida ----------
 
   function applyTelemetry(d) {
     lastSeen = Date.now();
+    setOfflineBanner(false);
 
     var tempMax  = parseFloat($('tempMax').value);
     var levelMin = parseFloat($('levelMin').value);
 
     if (d.device) $('deviceName').textContent = d.device;
 
-    // --- tinggi air ---
+    var pct = null;
+
+    // --- altura bee ---
     if (d.level_ok) {
-      var pct = (d.percent !== undefined) ? d.percent : (d.level / (d.tank || 100)) * 100;
+      pct = (d.percent !== undefined) ? d.percent : (d.level / (d.tank || 100)) * 100;
       $('levelValue').textContent = d.level.toFixed(1);
-      $('levelSub').textContent = 'Terisi ' + pct.toFixed(0) + '% dari ' + (d.tank || 100) + ' cm · jarak sensor ' + d.distance.toFixed(1) + ' cm';
+      $('levelSub').textContent = 'Nakonu ' + pct.toFixed(0) + '% husi ' + (d.tank || 100) + ' cm · distánsia sensór ' + d.distance.toFixed(1) + ' cm';
       drawTank(pct);
 
-      if (d.level < levelMin) setFlag('levelFlag', 'alarm', 'Air di bawah batas');
+      if (d.level < levelMin) setFlag('levelFlag', 'alarm', 'Bee iha okos limite');
       else setFlag('levelFlag', 'none', '');
     } else {
       $('levelValue').textContent = '—';
-      $('levelSub').textContent = 'Sensor HC-SR04 tidak membalas';
+      $('levelSub').textContent = 'Sensór HC-SR04 la responde';
       drawTank(0);
-      setFlag('levelFlag', 'alarm', 'Sensor jarak gagal');
+      setFlag('levelFlag', 'alarm', 'Sensór distánsia falha');
     }
 
-    // --- suhu ---
+    // --- temperatura ---
     if (d.temp_ok) {
       $('tempValue').textContent = d.temp.toFixed(1);
-      $('tempSub').textContent = 'Batas aman ' + tempMax.toFixed(1) + ' °C';
+      $('tempSub').textContent = 'Limite seguru ' + tempMax.toFixed(1) + ' °C';
 
-      var color = '#3E8FB0', flag = 'none', flagText = '';
-      if (d.temp > tempMax)       { color = '#AC2E1E'; flag = 'alarm'; flagText = 'Suhu di atas batas'; }
-      else if (d.temp > tempMax - 2) { color = '#B87400'; flag = 'warn'; flagText = 'Mendekati batas'; }
+      var color = '#8b5cf6', flag = 'none', flagText = '';
+      if (d.temp > tempMax)       { color = '#dc2626'; flag = 'alarm'; flagText = 'Temperatura iha leten limite'; }
+      else if (d.temp > tempMax - 2) { color = '#d97706'; flag = 'warn'; flagText = 'Besik ba limite'; }
 
       drawThermo(d.temp, color);
       setFlag('tempFlag', flag, flagText);
     } else {
       $('tempValue').textContent = '—';
-      $('tempSub').textContent = 'Sensor DS18B20 tidak terbaca';
-      setFlag('tempFlag', 'alarm', 'Sensor suhu gagal');
+      $('tempSub').textContent = 'Sensór DS18B20 la bele lee';
+      setFlag('tempFlag', 'alarm', 'Sensór temperatura falha');
     }
 
-    // --- riwayat ---
+    // --- istória ---
     history.push({
-      level: d.level_ok ? d.level : null,
-      temp:  d.temp_ok  ? d.temp  : null,
+      level:    d.level_ok ? d.level : null,
+      temp:     d.temp_ok  ? d.temp  : null,
+      distance: d.level_ok ? d.distance : null,
+      percent:  d.level_ok ? pct : null,
+      rssi:     (d.rssi !== undefined) ? d.rssi : null,
       t: lastSeen
     });
     if (history.length > HISTORY_MAX) history.shift();
     drawChart();
+    renderHistoryTable(tempMax, levelMin);
 
-    var rssi = (d.rssi !== undefined) ? ', sinyal ' + d.rssi + ' dBm' : '';
-    setStatus('live', 'Data masuk' + rssi);
+    var rssi = (d.rssi !== undefined) ? ', sinál ' + d.rssi + ' dBm' : '';
+    setStatus('live', 'Dadus tama' + rssi);
   }
 
   function setFlag(id, level, text) {
@@ -497,21 +742,23 @@ if (typeof mqtt === 'undefined') {
     el.textContent = text;
   }
 
-  // ---------- pengecekan data macet ----------
+  // ---------- verifika dadus para ----------
 
   setInterval(function () {
     if (!client || !client.connected) return;
-    if (lastSeen && Date.now() - lastSeen > STALE_MS) {
-      var secs = Math.round((Date.now() - lastSeen) / 1000);
-      setStatus('stale', 'Tidak ada data ' + secs + ' detik');
+    var ref = lastSeen || connectedAt;
+    if (ref && Date.now() - ref > STALE_MS) {
+      var secs = Math.round((Date.now() - ref) / 1000);
+      setStatus('stale', 'Laiha dadus durante ' + secs + ' segundu');
+      setOfflineBanner(true);
     }
   }, 2000);
 
-  // ---------- koneksi MQTT ----------
+  // ---------- konesaun MQTT ----------
 
   function connect() {
     if (typeof mqtt === 'undefined') {
-      log('Library MQTT gagal dimuat. Periksa koneksi internet, lalu muat ulang halaman.');
+      log('Livraria MQTT falha atu carrega. Verifika koneksaun internet, depois carrega fila fali pájina.');
       return;
     }
 
@@ -529,17 +776,19 @@ if (typeof mqtt === 'undefined') {
     };
     if ($('user').value) { opts.username = $('user').value; opts.password = $('pass').value; }
 
-    setStatus('down', 'Menghubungkan…');
-    log('Menghubungkan ke ' + url);
+    $('connectBtn').disabled = true;
+    setStatus('down', 'Hakonektu…');
+    log('Hakonektu ba ' + url);
 
     client = mqtt.connect(url, opts);
 
     client.on('connect', function () {
-      setStatus('live', 'Terhubung, menunggu data');
-      log('Terhubung ke broker.');
+      connectedAt = Date.now();
+      setStatus('live', 'Konektadu, hein dadus');
+      log('Konektadu ba broker.');
       client.subscribe([base + '/telemetry', base + '/status'], { qos: 0 }, function (err) {
-        if (err) log('Gagal berlangganan: ' + err.message);
-        else log('Berlangganan ' + base + '/telemetry dan ' + base + '/status');
+        if (err) log('Falha iha subskrisaun: ' + err.message);
+        else log('Subskreve ' + base + '/telemetry no ' + base + '/status');
       });
       $('connectBtn').disabled = true;
       $('disconnectBtn').disabled = false;
@@ -550,27 +799,31 @@ if (typeof mqtt === 'undefined') {
       var text = payload.toString();
 
       if (topic.endsWith('/status')) {
-        log('Status alat: ' + text);
-        if (text === 'offline') setStatus('down', 'Alat offline');
+        log('Status ekipamentu: ' + text);
+        if (text === 'offline') { setStatus('down', 'Ekipamentu offline'); setOfflineBanner(true); }
+        else setOfflineBanner(false);
         return;
       }
 
       try {
         applyTelemetry(JSON.parse(text));
       } catch (e) {
-        log('Payload tidak bisa dibaca: ' + text.slice(0, 80));
+        log('Payload la bele lee: ' + text.slice(0, 80));
       }
     });
 
-    client.on('reconnect', function () { setStatus('stale', 'Menghubungkan ulang…'); });
-    client.on('close',     function () { setStatus('down', 'Koneksi tertutup'); });
-    client.on('error',     function (e) { log('Kesalahan: ' + e.message); });
+    client.on('reconnect', function () { setStatus('stale', 'Hakonektu fila fali…'); });
+    client.on('close',     function () { setStatus('down', 'Konesaun taka'); });
+    client.on('error',     function (e) { log('Erru: ' + e.message); });
   }
 
   function disconnect() {
     if (client) { client.end(true); client = null; }
-    setStatus('down', 'Diputuskan');
-    log('Koneksi diputus.');
+    connectedAt = 0;
+    lastSeen = 0;
+    setStatus('down', 'Deskonektadu');
+    setOfflineBanner(false);
+    log('Konesaun deskonektadu ona.');
     $('connectBtn').disabled = false;
     $('disconnectBtn').disabled = true;
     $('pingBtn').disabled = true;
@@ -583,13 +836,14 @@ if (typeof mqtt === 'undefined') {
     if (!client || !client.connected) return;
     var base = $('base').value.trim().replace(/\/+$/, '');
     client.publish(base + '/cmd', 'publish');
-    log('Perintah "publish" dikirim ke ' + base + '/cmd');
+    log('Komandu "publish" haruka ba ' + base + '/cmd');
   });
 
   loadSettings();
   drawTank(0);
-  drawThermo(25, '#3E8FB0');
+  drawThermo(25, '#8b5cf6');
   drawChart();
+  connect();
 })();
 </script>
 </body>
