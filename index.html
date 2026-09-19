@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Cold Room IoT Dashboard</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <header>
+
+            <h1>
+                Cold Room IoT Dashboard
+            </h1>
+
+            <p>
+                ESP32 + DS18B20 + MQTT
+            </p>
+
+        </header>
+
+
+        <section class="status-card">
+
+            <div>
+
+                <span class="label">
+                    MQTT Status
+                </span>
+
+                <span
+                    id="mqttStatus"
+                    class="status offline"
+                >
+                    OFFLINE
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <section class="dashboard-grid">
+
+            <div class="card temperature-card">
+
+                <h2>
+                    Temperature
+                </h2>
+
+                <div
+                    id="temperature"
+                    class="temperature"
+                >
+                    --.-- °C
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h2>
+                    Device
+                </h2>
+
+                <div
+                    id="device"
+                    class="value"
+                >
+                    --
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h2>
+                    MQTT Topic
+                </h2>
+
+                <div
+                    id="topic"
+                    class="value"
+                >
+                    coldroom/temperature
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <h2>
+                    Last Update
+                </h2>
+
+                <div
+                    id="lastUpdate"
+                    class="value"
+                >
+                    --
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="card">
+
+            <h2>
+                Latest MQTT Message
+            </h2>
+
+            <pre id="message">
+Waiting for data...
+            </pre>
+
+        </section>
+
+
+        <footer>
+
+            Cold Room Monitoring System
+
+        </footer>
+
+    </div>
+
+
+    <!-- MQTT.js -->
+
+    <script
+        src="https://unpkg.com/mqtt/dist/mqtt.min.js">
+    </script>
+
+
+    <!-- Our JavaScript -->
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>

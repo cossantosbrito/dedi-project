@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cold Room Monitor</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --ground:#C4CED5;
+  --panel:#F3F7F9;
+  --panel-edge:#9FB0BA;
+  --ink:#16222B;
+  --muted:#5C707C;
+  --water:#1E6F9F;
+  --water-soft:#8EC4E0;
+  --cold:#3E8FB0;
+  --warn:#B87400;
+  --alarm:#AC2E1E;
+  --ok:#2C7A5B;
+  --radius:3px;
+}
+
+*{box-sizing:border-box}
+
+html,body{margin:0;padding:0}
+
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:'Barlow',system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.45;
+  padding:20px 16px 48px;
+}
+
+.wrap{max-width:900px;margin:0 auto}
+
+h1,h2,h3,.label,.readout-unit,button,select{
+  font-family:'Barlow Condensed','Barlow',system-ui,sans-serif;
+}
+
+/* ---------- header ---------- */
+
+.bar{
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:12px;
+  border-bottom:2px solid var(--ink);
+  padding-bottom:10px;margin-bottom:22px;
+}
+
+h1{font-size:30px;font-weight:600;letter-spacing:.2px;margin:0}
+
+.device{color:var(--muted);font-size:17px}
+
+.status{
+  margin-left:auto;display:inline-flex;align-items:center;gap:8px;
+  font-size:15px;font-weight:500;
+  padding:3px 12px;border-radius:999px;
+  border:1px solid var(--panel-edge);background:var(--panel);
+}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.status[data-state="live"] .dot{background:var(--ok)}
+.status[data-state="stale"] .dot{background:var(--warn)}
+.status[data-state="down"] .dot{background:var(--alarm)}
+
+/* ---------- instruments ---------- */
+
+.instruments{
+  display:grid;grid-template-columns:1fr 1fr;gap:16px;
+}
+
+.gauge{
+  background:var(--panel);
+  border:1px solid var(--panel-edge);
+  border-top:3px solid var(--ink);
+  border-radius:var(--radius);
+  padding:18px 18px 14px;
+  display:flex;gap:16px;
+}
+
+.gauge svg{flex:0 0 auto}
+
+.gauge-body{display:flex;flex-direction:column;justify-content:center;min-width:0}
+
+.label{
+  font-size:18px;font-weight:500;color:var(--muted);
+  margin:0 0 2px;
+}
+
+.readout{
+  font-size:54px;font-weight:600;line-height:1;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:-1px;
+}
+.readout-unit{font-size:24px;font-weight:400;color:var(--muted);margin-left:4px}
+
+.sub{font-size:15px;color:var(--muted);margin-top:8px}
+
+.flag{
+  display:inline-block;margin-top:10px;font-size:14px;font-weight:600;
+  padding:2px 9px;border-radius:2px;color:#fff;background:var(--ok);
+}
+.flag[data-level="warn"]{background:var(--warn)}
+.flag[data-level="alarm"]{background:var(--alarm)}
+.flag[data-level="none"]{display:none}
+
+.fill,.mercury{transition:y .5s ease,height .5s ease}
+
+/* ---------- history ---------- */
+
+.history{
+  margin-top:16px;background:var(--panel);
+  border:1px solid var(--panel-edge);border-radius:var(--radius);
+  padding:14px 18px 10px;
+}
+.history-head{display:flex;flex-wrap:wrap;gap:16px;align-items:baseline}
+.history h2{font-size:19px;font-weight:500;margin:0}
+.key{display:flex;gap:14px;margin-left:auto;font-size:14px;color:var(--muted)}
+.key span{display:inline-flex;align-items:center;gap:6px}
+.swatch{width:14px;height:3px;display:inline-block}
+
+/* ---------- settings + log ---------- */
+
+details{
+  margin-top:16px;background:var(--panel);
+  border:1px solid var(--panel-edge);border-radius:var(--radius);
+}
+summary{
+  cursor:pointer;padding:12px 18px;font-family:'Barlow Condensed',sans-serif;
+  font-size:19px;font-weight:500;
+}
+summary:focus-visible{outline:2px solid var(--water);outline-offset:-2px}
+.details-body{padding:0 18px 18px}
+
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}
+
+label.field{display:flex;flex-direction:column;gap:3px;font-size:14px;color:var(--muted)}
+input{
+  font:inherit;font-size:15px;padding:7px 9px;
+  border:1px solid var(--panel-edge);border-radius:2px;
+  background:#fff;color:var(--ink);width:100%;
+}
+input:focus-visible{outline:2px solid var(--water);outline-offset:-1px}
+
+.actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+
+button{
+  font-size:17px;font-weight:500;padding:8px 20px;cursor:pointer;
+  border:1px solid var(--ink);border-radius:2px;
+  background:var(--ink);color:#fff;
+}
+button.ghost{background:transparent;color:var(--ink)}
+button:focus-visible{outline:2px solid var(--water);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+.log{
+  margin-top:14px;max-height:190px;overflow:auto;
+  background:#fff;border:1px solid var(--panel-edge);
+  padding:8px 10px;font-size:13.5px;line-height:1.6;
+}
+.log p{margin:0;color:var(--muted)}
+.log b{color:var(--ink);font-weight:500}
+
+.hint{font-size:14px;color:var(--muted);margin:10px 0 0}
+
+@media (max-width:640px){
+  .instruments{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  .readout{font-size:46px}
+  h1{font-size:25px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .fill,.mercury{transition:none}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="bar">
+    <h1>Cold room monitor</h1>
+    <span class="device" id="deviceName">coldroom-01</span>
+    <span class="status" id="status" data-state="down">
+      <span class="dot"></span><span id="statusText">Belum terhubung</span>
+    </span>
+  </div>
+
+  <div class="instruments">
+
+    <!-- ===== TANGKI AIR ===== -->
+    <div class="gauge">
+      <svg width="76" height="180" viewBox="0 0 76 180" aria-hidden="true">
+        <defs>
+          <clipPath id="tankClip">
+            <path d="M8 8 h60 v140 a12 12 0 0 1 -12 12 h-36 a12 12 0 0 1 -12 -12 z"/>
+          </clipPath>
+        </defs>
+        <rect id="tankFill" class="fill" x="8" y="160" width="60" height="0"
+              fill="var(--water)" clip-path="url(#tankClip)"/>
+        <rect id="tankSurface" class="fill" x="8" y="160" width="60" height="3"
+              fill="var(--water-soft)" clip-path="url(#tankClip)"/>
+        <path d="M8 8 h60 v140 a12 12 0 0 1 -12 12 h-36 a12 12 0 0 1 -12 -12 z"
+              fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <g stroke="var(--panel-edge)" stroke-width="1">
+          <line x1="68" y1="46" x2="74" y2="46"/>
+          <line x1="68" y1="84" x2="74" y2="84"/>
+          <line x1="68" y1="122" x2="74" y2="122"/>
+        </g>
+      </svg>
+      <div class="gauge-body">
+        <p class="label">Tinggi air</p>
+        <div><span class="readout" id="levelValue">—</span><span class="readout-unit">cm</span></div>
+        <p class="sub" id="levelSub">Menunggu data</p>
+        <span class="flag" id="levelFlag" data-level="none"></span>
+      </div>
+    </div>
+
+    <!-- ===== SUHU RUANGAN ===== -->
+    <div class="gauge">
+      <svg width="76" height="180" viewBox="0 0 76 180" aria-hidden="true">
+        <defs>
+          <clipPath id="tubeClip">
+            <path d="M28 14 h20 v118 h-20 z M38 150 m-16 0 a16 16 0 1 0 32 0 a16 16 0 1 0 -32 0"/>
+          </clipPath>
+        </defs>
+        <rect id="mercury" class="mercury" x="28" y="140" width="20" height="26"
+              fill="var(--cold)" clip-path="url(#tubeClip)"/>
+        <circle cx="38" cy="150" r="16" fill="var(--cold)" id="bulb"/>
+        <path d="M28 14 a10 10 0 0 1 20 0 v112" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <path d="M48 126 v-112" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <circle cx="38" cy="150" r="16" fill="none" stroke="var(--ink)" stroke-width="2"/>
+        <g stroke="var(--panel-edge)" stroke-width="1">
+          <line x1="48" y1="40" x2="56" y2="40"/>
+          <line x1="48" y1="70" x2="56" y2="70"/>
+          <line x1="48" y1="100" x2="56" y2="100"/>
+        </g>
+      </svg>
+      <div class="gauge-body">
+        <p class="label">Suhu ruangan</p>
+        <div><span class="readout" id="tempValue">—</span><span class="readout-unit">°C</span></div>
+        <p class="sub" id="tempSub">Menunggu data</p>
+        <span class="flag" id="tempFlag" data-level="none"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== RIWAYAT ===== -->
+  <div class="history">
+    <div class="history-head">
+      <h2>Riwayat 60 pembacaan terakhir</h2>
+      <div class="key">
+        <span><i class="swatch" style="background:var(--water)"></i>Tinggi air</span>
+        <span><i class="swatch" style="background:var(--cold)"></i>Suhu</span>
+      </div>
+    </div>
+    <svg id="chart" viewBox="0 0 600 130" width="100%" height="130" preserveAspectRatio="none" role="img" aria-label="Grafik riwayat"></svg>
+  </div>
+
+  <!-- ===== PENGATURAN ===== -->
+  <details id="settings" open>
+    <summary>Koneksi &amp; batas aman</summary>
+    <div class="details-body">
+      <div class="grid">
+        <label class="field">Alamat broker (WebSocket)
+          <input id="url" value="wss://73ffe5ace0de41cfaac68f90275a934d.s1.eu.hivemq.cloud:8884/mqtt">
+        </label>
+        <label class="field">Topic dasar
+          <input id="base" value="coldroom/coldroom-daya-marketing">
+        </label>
+        <label class="field">Username (kosongkan bila tidak perlu)
+          <input id="user" value="">
+        </label>
+        <label class="field">Password
+          <input id="pass" type="password" value="">
+        </label>
+        <label class="field">Suhu maksimum (°C)
+          <input id="tempMax" type="number" step="0.5" value="8">
+        </label>
+        <label class="field">Tinggi air minimum (cm)
+          <input id="levelMin" type="number" step="0.5" value="5">
+        </label>
+      </div>
+
+      <div class="actions">
+        <button id="connectBtn">Hubungkan</button>
+        <button id="disconnectBtn" class="ghost" disabled>Putuskan</button>
+        <button id="pingBtn" class="ghost" disabled>Minta data sekarang</button>
+      </div>
+
+      <p class="hint">HiveMQ Cloud memakai port 8884 untuk WebSocket (bukan 8883, itu untuk perangkat), selalu <code>wss://</code>, dengan akhiran <code>/mqtt</code>. Username dan password wajib diisi.</p>
+
+      <div class="log" id="log"><p>Belum ada aktivitas.</p></div>
+    </div>
+  </details>
+
+</div>
+
+<script src="https://unpkg.com/mqtt@5/dist/mqtt.min.js"></script>
+<script>
+if (typeof mqtt === 'undefined') {
+  document.write('<script src="https://cdn.jsdelivr.net/npm/mqtt@5/dist/mqtt.min.js"><\/script>');
+}
+</script>
+
+<script>
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  var client = null;
+  var lastSeen = 0;
+  var history = [];          // {level, temp, t}
+  var HISTORY_MAX = 60;
+  var STALE_MS = 15000;
+
+  // ---------- penyimpanan pengaturan di browser ----------
+
+  var FIELDS = ['url', 'base', 'user', 'pass', 'tempMax', 'levelMin'];
+
+  function loadSettings() {
+    try {
+      var saved = JSON.parse(localStorage.getItem('coldroom.settings') || '{}');
+      FIELDS.forEach(function (k) { if (saved[k] !== undefined) $(k).value = saved[k]; });
+    } catch (e) { /* abaikan */ }
+  }
+
+  function saveSettings() {
+    try {
+      var out = {};
+      FIELDS.forEach(function (k) { out[k] = $(k).value; });
+      localStorage.setItem('coldroom.settings', JSON.stringify(out));
+    } catch (e) { /* abaikan */ }
+  }
+
+  // ---------- log ----------
+
+  function log(msg) {
+    var box = $('log');
+    if (box.dataset.ready !== '1') { box.innerHTML = ''; box.dataset.ready = '1'; }
+    var p = document.createElement('p');
+    var time = new Date().toLocaleTimeString();
+    p.innerHTML = '<b>' + time + '</b> — ' + msg;
+    box.insertBefore(p, box.firstChild);
+    while (box.childNodes.length > 60) box.removeChild(box.lastChild);
+  }
+
+  // ---------- status ----------
+
+  function setStatus(state, text) {
+    $('status').dataset.state = state;
+    $('statusText').textContent = text;
+  }
+
+  // ---------- gambar tangki & termometer ----------
+
+  var TANK_TOP = 10, TANK_BOTTOM = 158;
+
+  function drawTank(percent) {
+    var p = Math.max(0, Math.min(100, percent)) / 100;
+    var h = (TANK_BOTTOM - TANK_TOP) * p;
+    var y = TANK_BOTTOM - h;
+    $('tankFill').setAttribute('y', y);
+    $('tankFill').setAttribute('height', h);
+    $('tankSurface').setAttribute('y', Math.max(TANK_TOP, y - 2));
+    $('tankSurface').setAttribute('height', h > 2 ? 3 : 0);
+  }
+
+  var T_MIN = -20, T_MAX = 30, COL_TOP = 20, COL_BOTTOM = 132;
+
+  function drawThermo(temp, color) {
+    var t = Math.max(T_MIN, Math.min(T_MAX, temp));
+    var ratio = (t - T_MIN) / (T_MAX - T_MIN);
+    var y = COL_BOTTOM - (COL_BOTTOM - COL_TOP) * ratio;
+    $('mercury').setAttribute('y', y);
+    $('mercury').setAttribute('height', 166 - y);
+    $('mercury').setAttribute('fill', color);
+    $('bulb').setAttribute('fill', color);
+  }
+
+  // ---------- grafik riwayat ----------
+
+  function drawChart() {
+    var svg = $('chart');
+    svg.innerHTML = '';
+
+    if (history.length < 2) {
+      var t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+      t.setAttribute('x', 300); t.setAttribute('y', 68);
+      t.setAttribute('text-anchor', 'middle');
+      t.setAttribute('fill', '#5C707C');
+      t.setAttribute('font-size', '14');
+      t.setAttribute('font-family', 'Barlow, sans-serif');
+      t.textContent = 'Grafik muncul setelah beberapa pembacaan masuk.';
+      svg.appendChild(t);
+      return;
+    }
+
+    var W = 600, H = 130, PAD = 8;
+
+    function line(values, color) {
+      var valid = values.filter(function (v) { return v !== null; });
+      if (valid.length < 2) return;
+
+      var min = Math.min.apply(null, valid);
+      var max = Math.max.apply(null, valid);
+      if (max - min < 0.5) { max = min + 0.5; }
+
+      var d = '', started = false;
+
+      values.forEach(function (v, i) {
+        if (v === null) { started = false; return; }
+        var x = PAD + (W - PAD * 2) * (values.length === 1 ? 0 : i / (values.length - 1));
+        var y = H - PAD - (H - PAD * 2) * ((v - min) / (max - min));
+        d += (started ? ' L' : ' M') + x.toFixed(1) + ' ' + y.toFixed(1);
+        started = true;
+      });
+
+      var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', d.trim());
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', color);
+      path.setAttribute('stroke-width', '2');
+      path.setAttribute('stroke-linejoin', 'round');
+      path.setAttribute('vector-effect', 'non-scaling-stroke');
+      svg.appendChild(path);
+    }
+
+    line(history.map(function (h) { return h.level; }), '#1E6F9F');
+    line(history.map(function (h) { return h.temp; }), '#3E8FB0');
+  }
+
+  // ---------- olah satu pesan telemetry ----------
+
+  function applyTelemetry(d) {
+    lastSeen = Date.now();
+
+    var tempMax  = parseFloat($('tempMax').value);
+    var levelMin = parseFloat($('levelMin').value);
+
+    if (d.device) $('deviceName').textContent = d.device;
+
+    // --- tinggi air ---
+    if (d.level_ok) {
+      var pct = (d.percent !== undefined) ? d.percent : (d.level / (d.tank || 100)) * 100;
+      $('levelValue').textContent = d.level.toFixed(1);
+      $('levelSub').textContent = 'Terisi ' + pct.toFixed(0) + '% dari ' + (d.tank || 100) + ' cm · jarak sensor ' + d.distance.toFixed(1) + ' cm';
+      drawTank(pct);
+
+      if (d.level < levelMin) setFlag('levelFlag', 'alarm', 'Air di bawah batas');
+      else setFlag('levelFlag', 'none', '');
+    } else {
+      $('levelValue').textContent = '—';
+      $('levelSub').textContent = 'Sensor HC-SR04 tidak membalas';
+      drawTank(0);
+      setFlag('levelFlag', 'alarm', 'Sensor jarak gagal');
+    }
+
+    // --- suhu ---
+    if (d.temp_ok) {
+      $('tempValue').textContent = d.temp.toFixed(1);
+      $('tempSub').textContent = 'Batas aman ' + tempMax.toFixed(1) + ' °C';
+
+      var color = '#3E8FB0', flag = 'none', flagText = '';
+      if (d.temp > tempMax)       { color = '#AC2E1E'; flag = 'alarm'; flagText = 'Suhu di atas batas'; }
+      else if (d.temp > tempMax - 2) { color = '#B87400'; flag = 'warn'; flagText = 'Mendekati batas'; }
+
+      drawThermo(d.temp, color);
+      setFlag('tempFlag', flag, flagText);
+    } else {
+      $('tempValue').textContent = '—';
+      $('tempSub').textContent = 'Sensor DS18B20 tidak terbaca';
+      setFlag('tempFlag', 'alarm', 'Sensor suhu gagal');
+    }
+
+    // --- riwayat ---
+    history.push({
+      level: d.level_ok ? d.level : null,
+      temp:  d.temp_ok  ? d.temp  : null,
+      t: lastSeen
+    });
+    if (history.length > HISTORY_MAX) history.shift();
+    drawChart();
+
+    var rssi = (d.rssi !== undefined) ? ', sinyal ' + d.rssi + ' dBm' : '';
+    setStatus('live', 'Data masuk' + rssi);
+  }
+
+  function setFlag(id, level, text) {
+    var el = $(id);
+    el.dataset.level = level;
+    el.textContent = text;
+  }
+
+  // ---------- pengecekan data macet ----------
+
+  setInterval(function () {
+    if (!client || !client.connected) return;
+    if (lastSeen && Date.now() - lastSeen > STALE_MS) {
+      var secs = Math.round((Date.now() - lastSeen) / 1000);
+      setStatus('stale', 'Tidak ada data ' + secs + ' detik');
+    }
+  }, 2000);
+
+  // ---------- koneksi MQTT ----------
+
+  function connect() {
+    if (typeof mqtt === 'undefined') {
+      log('Library MQTT gagal dimuat. Periksa koneksi internet, lalu muat ulang halaman.');
+      return;
+    }
+
+    saveSettings();
+
+    var url  = $('url').value.trim();
+    var base = $('base').value.trim().replace(/\/+$/, '');
+
+    var opts = {
+      clientId: 'dashboard-' + Math.random().toString(16).slice(2, 10),
+      keepalive: 30,
+      clean: true,
+      reconnectPeriod: 4000,
+      connectTimeout: 8000
+    };
+    if ($('user').value) { opts.username = $('user').value; opts.password = $('pass').value; }
+
+    setStatus('down', 'Menghubungkan…');
+    log('Menghubungkan ke ' + url);
+
+    client = mqtt.connect(url, opts);
+
+    client.on('connect', function () {
+      setStatus('live', 'Terhubung, menunggu data');
+      log('Terhubung ke broker.');
+      client.subscribe([base + '/telemetry', base + '/status'], { qos: 0 }, function (err) {
+        if (err) log('Gagal berlangganan: ' + err.message);
+        else log('Berlangganan ' + base + '/telemetry dan ' + base + '/status');
+      });
+      $('connectBtn').disabled = true;
+      $('disconnectBtn').disabled = false;
+      $('pingBtn').disabled = false;
+    });
+
+    client.on('message', function (topic, payload) {
+      var text = payload.toString();
+
+      if (topic.endsWith('/status')) {
+        log('Status alat: ' + text);
+        if (text === 'offline') setStatus('down', 'Alat offline');
+        return;
+      }
+
+      try {
+        applyTelemetry(JSON.parse(text));
+      } catch (e) {
+        log('Payload tidak bisa dibaca: ' + text.slice(0, 80));
+      }
+    });
+
+    client.on('reconnect', function () { setStatus('stale', 'Menghubungkan ulang…'); });
+    client.on('close',     function () { setStatus('down', 'Koneksi tertutup'); });
+    client.on('error',     function (e) { log('Kesalahan: ' + e.message); });
+  }
+
+  function disconnect() {
+    if (client) { client.end(true); client = null; }
+    setStatus('down', 'Diputuskan');
+    log('Koneksi diputus.');
+    $('connectBtn').disabled = false;
+    $('disconnectBtn').disabled = true;
+    $('pingBtn').disabled = true;
+  }
+
+  $('connectBtn').addEventListener('click', connect);
+  $('disconnectBtn').addEventListener('click', disconnect);
+
+  $('pingBtn').addEventListener('click', function () {
+    if (!client || !client.connected) return;
+    var base = $('base').value.trim().replace(/\/+$/, '');
+    client.publish(base + '/cmd', 'publish');
+    log('Perintah "publish" dikirim ke ' + base + '/cmd');
+  });
+
+  loadSettings();
+  drawTank(0);
+  drawThermo(25, '#3E8FB0');
+  drawChart();
+})();
+</script>
+</body>
+</html>
